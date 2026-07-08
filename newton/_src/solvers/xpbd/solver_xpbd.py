@@ -112,7 +112,7 @@ class SolverXPBD(SolverBase, CouplingInterface):
         rigid_contact_relaxation: float = 0.8,
         rigid_contact_con_weighting: bool = True,
         angular_damping: float = 0.0,
-        enable_restitution: bool = False,
+        enable_restitution: bool | None = None,
     ):
         super().__init__(model=model)
         self.iterations = iterations
@@ -130,8 +130,9 @@ class SolverXPBD(SolverBase, CouplingInterface):
 
         self.angular_damping = angular_damping
 
-        self.enable_restitution = enable_restitution
-        if not enable_restitution:
+        if enable_restitution is None:
+            enable_restitution = False
+        elif not enable_restitution:
             # stacklevel=3 skips the deprecate_nonkeyword_arguments wrapper
             warnings.warn(
                 "SolverXPBD(enable_restitution=False) is deprecated. XPBD will enable "
@@ -141,6 +142,7 @@ class SolverXPBD(SolverBase, CouplingInterface):
                 DeprecationWarning,
                 stacklevel=3,
             )
+        self.enable_restitution = enable_restitution
 
         self.compute_body_velocity_from_position_delta = False
 

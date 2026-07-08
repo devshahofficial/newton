@@ -8,6 +8,7 @@ Includes tests for particle-particle friction using relative velocity correctly.
 """
 
 import unittest
+import warnings
 
 import numpy as np
 import warp as wp
@@ -1757,7 +1758,22 @@ devices = get_test_devices()
 
 
 class TestSolverXPBD(unittest.TestCase):
-    pass
+    def test_enable_restitution_default_keeps_legacy_behavior_without_warning(self):
+        model = newton.ModelBuilder().finalize(device="cpu")
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", DeprecationWarning)
+            solver = newton.solvers.SolverXPBD(model)
+
+        self.assertFalse(solver.enable_restitution)
+
+    def test_enable_restitution_false_warns(self):
+        model = newton.ModelBuilder().finalize(device="cpu")
+
+        with self.assertWarnsRegex(DeprecationWarning, "enable_restitution=False"):
+            solver = newton.solvers.SolverXPBD(model, enable_restitution=False)
+
+        self.assertFalse(solver.enable_restitution)
 
 
 add_function_test(
